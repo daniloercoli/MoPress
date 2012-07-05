@@ -1,0 +1,10 @@
+<loader version="1.0" />
+<application id="test">
+<description>WordPress Mobile Client</description>
+<version>0.0.1</version>
+<vendor>Danais s.r.l.</vendor>
+<fileset Java="1.0">
+<files>bb_mopress.cod</files>
+</fileset>
+</application>
+</loader>

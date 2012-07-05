@@ -1,0 +1,474 @@
+/** 
+  * The polish.css files contains all
+  * design information about a project.
+  * It can be adjusted for specific devices
+  * or device groups by putting it in the 
+  * appropriate sub-folder.
+  * If you want to adjust a design for all
+  * Nokia devices, define it in "resources/Nokia/polish.css"
+  * and so on. Only new and different settings
+  * need to be specified in such polish.css files. 
+  */
+
+/**
+  * the colors which are defined in
+  * the colors section can later be referenced.
+  * This makes changes easy, since the color
+  * just needs to be changed in one position.
+  * Even default colors (like blue, green, lime, etc)
+  * can be changed here. 
+  */
+colors {
+	bgColor:  rgb(206,206,206);
+	brightBgColor:  white;
+	focusedBgColor:  rgb(112,161,130);
+	translucentBgColor:  rgb(206, 206, 206);
+	brightFontColor: rgb(238,241,229);
+	fontColor: black;
+	/*activeTabColor: bgColor; utilizza direttamente il color del background */
+	inactiveTabColor: rgb(238,238,238);
+}
+
+backgrounds {
+
+	sfondo_sfumato{
+		type: vertical-gradient;
+		top-color:  rgb(44, 154, 201);
+		bottom-color: rgb(33,117,155);
+		start: 0%;
+		end: 100%;
+	}
+	
+	sfondo_sfumato_grigio {
+		type: vertical-gradient;
+		top-color:  rgb(221,221,221);
+		bottom-color: rgb(243,243,243);
+		start: 0%;
+		end: 100%;
+	}
+	
+	sfondo_sfumato_grigio_chiaro {
+		type: vertical-gradient;
+		top-color:  rgb(243,243,243);
+		bottom-color: white;
+		start: 0%;
+		end: 100%;
+	}
+	
+	sfondo_pieno_grigio_chiaro {
+		type: round-rect;
+		color: rgb(243,243,243);;
+	}
+	
+	sfondo_pieno {
+		type: round-rect;
+		color: #ccc;
+	}
+	
+}	
+
+borders {
+	bordoSottileNero{
+		type:round-rect;
+		color:black;
+	}
+	
+}
+
+
+/**
+  * The title style is a predefined style which is used
+  * for all screen-titles.
+  */
+title {
+	padding: 2;
+	margin-top: 0;
+	margin-bottom: 5;
+	margin-left: 0;
+	margin-right: 0;
+	
+	font-face: proportional;
+	font-size: medium;
+	font-style: normal;
+	font-color: White;
+	background :sfondo_sfumato;
+	
+	border: none;
+	border-bottom: 1;
+	border-color: black;
+	layout: horizontal-center | horizontal-expand;
+}
+
+/**
+  * The focused style is a predefined style which
+  * is used by lists, forms, choice-groups and so on.
+  * This style will be used for highlighting the currently
+  * focused item.
+  */
+focused {
+	background {
+		type: round-rect;
+		border-color: black;
+		border-width: 1;
+	}
+	font {
+		color: fontColor;
+	}	
+	layout: left | horizontal-expand;
+}
+
+
+/**
+  * the menu style is a predefined style for
+  * designing the fullscreen-menu.
+  * The font-settings (font-color,
+  * font-face, font-style and font-size)
+  * are used to design the menu-texts
+  * (like Options, Select, or Cancel).
+  * With the focused-style attribute
+  * another style than the default "focused"
+  * style is used for the menu. 
+  * The menubar-color can be set to any
+  * color. When "transparent" is used,
+  * the background shines through.
+  */
+menu {
+	margin-left: 2;
+	background: sfondo_sfumato_grigio;
+	
+	border-color: black;
+	border-width: 1;
+	
+	focused-style: .menuFocused;
+	font-color: black;
+	font-style: plain;
+	menubar-color: bgColor;
+	view-type: slide-up;
+}
+
+/** Style for the first layer of subcommands: **/
+menu1 extends menu {
+	view-type: none; /* deactivate sliding for the subcommands */
+}
+
+/**
+  * The menuItem style is a predefined style
+  * for the actual commands in a fullscreen-menu.
+  * When the menuItem style is not defined,
+  * the menu style will be used instead. 
+  */
+menuItem {
+	padding: 2;
+	padding-left: 5;
+	font {
+		color: black;
+		size: normal;
+		style: plain;
+	}
+	//#if ${ exists( arrow_right.gif ) }
+		command-child-indicator: url(arrow_right.gif);
+	//#else
+		command-child-indicator-color: white;
+		command-child-indicator-width: 8;
+		command-child-indicator-height: 10;
+	//#endif
+	layout: left;
+}
+
+/**
+  * This is a custom style for selected
+  * menu items. It is used, because it has
+  * been defined in the menu style. 
+  */
+.menuFocused extends .menuItem {
+	background :sfondo_sfumato;
+	font-color: white;
+	layout: left | horizontal-expand;
+}
+
+
+/*  style for Form  */
+.myForm {
+	background: sfondo_sfumato_grigio;
+	padding-left: 5;
+	padding-right: 5;
+}
+
+
+/** 
+  * The .blogList style is a static style, which
+  * is set in the MIDlet source-code with the //#style directive.
+  * If the source-code would not have defined this
+  * style, we could use the dynamic style "list" to design all
+  * list-screens. 
+  * An interesting attribute is the "columns" attribute which
+  * is used to use a table with two columns instead of the default
+  * layout.
+  */
+.blogList {
+	padding: 5;
+	/*padding-left: 20;*/
+	/*padding-right: 20;*/
+	padding-vertical: 10;
+	background: sfondo_sfumato_grigio_chiaro;
+	layout:  horizontal-center;
+	columns: 1;
+}
+
+/**
+  * The .blogEntry style is also a static style, which
+  * is set in the MIDlet source-code with the //#style directive.
+  * If the source-code would not have defined this
+  * style, we could use the dynamic style "listitem" to design all
+  * items on the list-screens. 
+  * An interesting attribute is the "icon-image" URL, which uses
+  * the %INDEX% keyword. The first list-item will use the image
+  * "icon0.png", the second "icon1.png" and so on. 
+  */
+.blogEntry {
+	margin: 2; /* for the missing border of the focused style */
+	padding: 5;
+	background: none;
+	font-color: fontColor;
+	font-style: bold;
+	font-size: small;
+	layout: left;
+	max-width: 100;
+	/*icon-image: url( icon%INDEX%.png );
+	icon-image-align: top;*/
+}
+
+
+
+/* alert section */
+
+.generalAlert {
+	title-style: none;
+	
+	//#if !polish.useScrollBar
+		scrollindicator-up-image: url( arrow_up.png );
+		scrollindicator-down-image: url( arrow_down.png );
+	//#endif
+
+	//#if polish.midp2
+		screen-change-animation: fade;
+	//#endif
+
+	margin-right: 10;
+	margin-left: 10;
+	padding: 5;
+	padding-left: 5;
+	padding-right: 5;
+	layout: horizontal-center | bottom | horizontal-shrink | vertical-shrink;
+	repaint-previous-screen: true;
+	
+	//#if polish.midp2 || polish.api.nokia-ui
+		border {
+			type: drop-shadow;
+			width: 6;
+			inner-color: black;
+			outer-color: gray;
+			orientation: top-right;
+		}
+	//#endif
+	
+	//#if polish.midp2
+		screen-change-animation: fade;
+	//#endif
+
+	background: sfondo_sfumato_grigio;
+}
+
+alertcontent {
+	font-color: black;
+}
+
+
+/* Tabbed From Section */
+
+.tabbedForm {
+	padding: 4;
+	layout: hcenter | vcenter;
+	background {
+		type: vertical-gradient;
+		top-color: bgColor;
+		bottom-color: brightFontColor;
+		start: 10%;
+		end: 80%;
+		top: title;
+		bottom: menubar;
+	}
+	/* not supported because we use the extended menu bar:
+	menubar-color: menubarColor;
+	*/
+/*	scrollindicator-up-image: url( arrowU.png );
+	scrollindicator-down-image: url( arrowD.png );*/
+	title-style: title;
+}
+
+tabbar {
+	background-color: white;
+	layout: expand;
+	padding-bottom: 0;
+	tabbar-left-arrow: url( arrow_left.gif );
+	tabbar-right-arrow: url( arrow_right.gif );
+	tabbar-arrow-y-offset: 3;
+	tabbar-roundtrip: true;
+	/* not supported, since we use arrow images:
+	tabbar-scrolling-indicator-color: COLOR_FOREGROUND;
+	*/
+}
+
+activetab {
+	padding: 3;
+	padding-left: 10;
+	padding-right: 8;
+	padding-top: 7;
+	background-type: round-tab;
+	background-color: bgColor;
+	background-arc: 8;
+	font-color: black;
+	font-style: bold;
+}
+
+inactivetab {
+	margin-left: 2;
+	margin-right: 2;
+	margin-bottom: 1;
+	padding: 3;
+	padding-left: 6;
+	padding-right: 4;
+	background-type: round-tab;
+	background-color: inactiveTabColor;
+	background-arc: 8;
+	font-color: gray;
+}
+
+
+.postItemInput {
+	textfield-direct-input: true;
+	layout: left | expand;
+	textfield-height:200;
+	textfield-width:200;
+
+}
+
+
+
+
+/**
+*
+*  style for choice item orizzontali
+*
+*/
+.horizontalChoice {
+	margin-top:5;	
+	margin-bottom:10;	
+	label-style: myItemLabel;
+	complete-background: sfondo_pieno;
+	complete-background-padding: 3;
+		
+	background-type: round-rect;
+	background-color: white;
+	layout: expand;
+	view-type: horizontal-choice;
+	horizontalview-left-arrow: url( arrow_left.gif );
+	horizontalview-right-arrow: url( arrow_right.gif );
+}
+
+.horizontalChoice:hover {
+	background-color: white;
+	complete-background: sfondo_pieno;
+	complete-background-padding: 3;
+	complete-border: bordoSottileNero;
+	font-color: fontColor;
+}
+
+.choiceItem {
+	font-color: gray;
+	font-style: plain;
+	text-wrap: false;
+}
+
+.choiceItem:hover {
+	font-color: fontColor;
+}
+
+
+.myItemLabel {
+	font-color: Gray;
+	font-style: bold | italic;
+	layout: newline-after;
+}
+
+.myItem {
+	margin-top:5;	
+	margin-bottom:10;	
+	label-style: myItemLabel;
+	complete-background: sfondo_pieno;
+	complete-background-padding: 3;
+		
+	background-type: round-rect;
+	background-color: white;
+	layout: expand;
+}
+
+.myItem:hover {
+	complete-background: sfondo_pieno;
+	complete-background-padding: 3;
+	complete-border: bordoSottileNero;
+	font-color: fontColor;
+}
+
+
+.itemFlashText {
+/*			text-effect: flash;
+        text-flash-interval: 300;*/
+        layout: horizontal-center | horizontal-expand;
+        font {
+             face: proportional;
+             size: large;
+             style: bold;
+             color: fontColor;
+        }
+        background-color: #fff;
+}
+
+.itemText {
+	
+        layout: horizontal-center | horizontal-expand;
+        font {
+             face: proportional;
+             size: large;
+             style: bold;
+             color: fontColor;
+        }
+        background-color: #fff;
+}
+
+/*Workspace davide*/
+
+.htmlBrowser {
+	view-type: midp2;
+
+/*carousel, coverflow, fade-in, fade-out, fisheye, grayout, midp2, numbered, particle, shuffle, size-decrease, size-increase, slide, verticalfixed*/
+}
+
+.browserText {
+	font-size: small;
+	font-color: black;
+}
+
+.browserLink {
+	font-color: blue;
+	font-style: bold;
+}
+
+.browserLink:hover {
+	font-color: red;
+}
+
+
+
+
+

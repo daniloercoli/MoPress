@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="j2mepolish" name="mopress">
+	
+	<!-- import user specific properties                          -->
+	<!-- property file="${user.name}.properties" / -->
+
+	<!-- The device which is used for the emulator.               -->
+	<!-- You can call Ant from the command line with another      -->
+	<!-- device like this: ant -Ddevice=Generic/midp2 emulator    -->
+	<property name="device" value="Generic/AnyPhone"/>
+	<property name="devices" value="${device}"/>
+
+	<!-- Generic/Midp2Cldc11, -->
+	<!-- property name="devices" value="${device},Nokia/Series40E3,Nokia/Series60E3,Sony-Ericsson/JavaPlatform8"/ -->
+
+
+	<!-- The polish.home property needs to point to the directory -->
+	<!-- containing the J2ME Polish installation.                 -->
+	<property name="polish.home" location="C:\opt\J2ME-Polish" />
+	
+	<!-- import global properties                                 -->
+	<property file="${polish.home}/global.properties" />
+
+	
+	<!-- Definition of the J2ME Polish task:                      -->
+	<taskdef name="j2mepolish" 
+		classname="de.enough.polish.ant.PolishTask" 
+		classpath="${polish.home}/lib/enough-j2mepolish-build.jar:${polish.home}/lib/jdom.jar"
+	/>
+	
+	<!-- path del JDE compiler -->
+	<property name="blackberry.home"
+		location="C:\\opt\\Research In Motion\\BlackBerry JDE 4.6.0" />
+	
+	<!-- build targets, each target can be called via "ant [name]", 
+		 e.g. "ant clean", "ant notest j2mepolish" or just "ant" for calling the default-target -->
+	<target name="test">
+		<property name="test" value="true"/>
+		<property name="dir.work" value="build/test"/>
+	</target>
+		
+	<target name="deploy">
+		<property name="deploy-url" value="http://www.danais.it/files/mopress/"/>
+	</target>
+			
+	<target name="init">
+	  	<property name="test" value="false"/>
+		<property name="deploy-url" value=""/>
+		<property name="dir.work" value="build/real"/>
+	</target>
+	    
+	<target depends="init" name="j2mepolish">
+		<j2mepolish>
+		    <!-- general settings -->
+			<info 
+				name="Mopress" 
+				vendorName="Danais s.r.l." 
+				version="0.3.5"
+				copyright="Copyright 2009 Danais srl. All rights reserved." 
+				description="Danais Mobile Blogging Suite" 
+				icon="mobiler-ico.png"
+				infoUrl="http://www.danais.it" 
+				jarName="${polish.vendor}-${polish.name}-${polish.locale}-mopress.jar" 
+				jarUrl="${deploy-url}${polish.jarName}" 
+				deleteConfirm="Do you really want to remove MoPress?" 
+		    />
+			
+			<!-- selection of supported devices -->
+			<deviceRequirements if="test">
+				<requirement name="Identifier" value="${device}"/>
+			</deviceRequirements>
+			<deviceRequirements unless="test">
+				<requirement name="Identifier" value="${devices}"/>
+			</deviceRequirements>
+		    
+			<!-- build settings -->
+			<build	fullscreen="menu" usePolishGui="true" workDir="${dir.work}" >
+				
+			
+				<sources>
+					<source dir="source" /> 
+					<source dir="thirdparty" />
+				</sources>
+				
+				<!-- midlets definition -->
+				<midlet class="com.danais.mobile.MoPressMidlet" name="MoPress"/>
+								
+				<libraries>
+					<library file="lib/kxml2-2.3.0.jar" />
+				</libraries>
+				
+				 <postcompiler name="floater">
+						<parameter name="verbose" value="false" />
+			      </postcompiler>
+				
+				<!-- project-wide variables - used for preprocessing  -->
+				<variables>
+					<variable name="polish.TiledLayer.useBackBuffer" value="true"/>
+					<variable name="polish.TiledLayer.TransparentTileColor" value="0x00FF00"/>
+					<variable name="polish.useScrollBar" value="true" />
+					<variable name="polish.TextField.suppressCommands" value="true"/>
+				</variables>
+				<!-- You can set localized variables in the resources/messages.txt files as well.  -->
+				<!-- variables includeAntProperties="true" >
+					<variable name="polish.TextField.useDirectInput" value="true" />
+					<variable name="polish.TextField.usePredictiveInput" value="true" />
+					<variable name="polish.TextField.includeInputInfo" value="true" />
+					<variable name="polish.TextField.supportSymbolsEntry" value="true" />
+					<variable name="polish.MenuBar.useExtendedMenuBar" value="true" />
+					<variable name="polish.useScrollBar" value="true" />
+					<variable name="polish.ScreenInfo.enable" value="true" />
+				</variables -->
+				
+				<manifestFilter if="polish.vendor == Samsung">
+					Manifest-Version, MIDlet-Name, MIDlet-Version, 
+					MIDlet-Vendor, MIDlet-1*,MIDlet-Icon?, MIDlet-Data-Size?, 
+					MIDlet-Description?, MIDlet-Info-URL?,
+					MicroEdition-Profile?, MicroEdition-Configuration?
+				</manifestFilter>
+				<jad>
+					<filter if="polish.vendor == Samsung">
+						MIDlet-Name, MIDlet-Version, MIDlet-Vendor,  
+						MIDlet-1*,MIDlet-Icon?, MIDlet-Data-Size?, MIDlet-Description?,
+						MIDlet-Info-URL?, MicroEdition-Profile?, MicroEdition-Configuration?
+					</filter>
+				</jad>
+				
+				<!-- obfuscator settings: do not obfuscate when the test-property is true -->
+				<obfuscator name="ProGuard" unless="test or polish.blackberry">
+					<parameter name="dontusemixedcaseclassnames" value="" />				
+					<parameter name="repackageclasses" value=""/>
+					<parameter name="allowaccessmodification"  value=""/>
+					<parameter name="overloadaggressively"  value=""/>
+					<parameter name="microedition" value="" />
+					<!-- parameter name="ignorewarning" value="" / -->										
+				</obfuscator>
+				
+				<!-- debug settings: only include debug setting when the test-property is true -->
+				<debug level="debug" showLogOnError="true" verbose="true" if="test">
+					<filter level="info" pattern="de.enough.polish.*"/>
+				</debug>
+				
+				<resources
+					dir="resources"
+					defaultexcludes="yes"
+					excludes="readme.txt, *.definition">
+
+					<localization dynamic="true" defaultLocale="en">
+						<locale name="en" />
+						<locale name="it" encoding="UTF-8"/>
+					</localization>
+						
+				</resources>
+			</build>
+			<!-- launch emulator		-->
+			<emulator securityDomain="maximum" enableMemoryMonitor="false" if="test">
+				<parameter name="-Xheapsize" value="64M" />
+				
+
+			</emulator>
+		</j2mepolish>
+	</target>
+	
+	<target name="emulator"	depends="test,j2mepolish" description="invokes the emulator">
+	</target>
+	
+	<target description="allows a clean build. You should call [ant clean] whenever you made changes to devices.xml, vendors.xml or groups.xml" name="clean">
+		<delete dir="build"/>
+		<delete dir="dist" includes="**/*" />
+	</target>
+
+	<target  
+		name="cleanbuild"
+		description="allows a clean build. You should call [ant cleanbuild] whenever you made changes to devices.xml, vendors.xml or groups.xml"
+		depends="clean, j2mepolish"
+	/>
+
+	
+	<target name="src-dist" description="Crea il file .zip dei sorgenti" depends="clean,init">
+			<echo>*************************************************************</echo>
+			<echo>      			  Create file zip  						   </echo>
+			<echo>*************************************************************</echo>
+			<mkdir dir="dist"/>
+			<zip destfile="c:/mopress_src.zip" >	
+				<fileset dir=".">
+					<exclude name="**/*.jbf"/>
+					<exclude name="**/Thumbs.db"/>
+					<exclude name="dist/**/"/>
+					<exclude name="bin/**/"/>
+					<exclude name="build/**/"/>
+					<exclude name=".mtj*/**"/>
+					<exclude name=".polish*/**"/>
+					<exclude name=".setting*/**"/>
+				</fileset>			
+			</zip>
+	</target>	
+</project>

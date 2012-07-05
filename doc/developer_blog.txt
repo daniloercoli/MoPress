@@ -1,0 +1,43 @@
+1) http://sourceforge.net/forum/forum.php?thread_id=1888128&forum_id=687435 
+
+I have modified kxmlrpc1.1.2 source code in XmlRpcParser in such way:
+
+I've tried out the kxmlrpc package for a mobile blogging application and 
+I've received the mentioned response from wordpress.com. Unfortunately I 
+don't know which XML-RPC library they are using. 
+My first solution is to ignore the XmlPullParserException because of a 
+missing end value tag if the current parsed text is equal " ". Possibly it 
+is not very nice but it works. 
+ 
+ 
+Object parseValue() throws XmlPullParserException, IOException { 
+Object result = null; 
+parser.require(XmlPullParser.START_TAG, null, "value"); 
+int nextEvent = parser.next(); 
+if( nextEvent == XmlPullParser.TEXT) { 
+result = parser.getText(); 
+nextEvent = parser.nextTag(); 
+try{ 
+parser.require( XmlPullParser.END_TAG, "", "value" ); 
+} 
+catch(XmlPullParserException e){ 
+if(!"".equals(((String)result).trim())) 
+throw e; 
+} 
+} 
+if(nextEvent == XmlPullParser.START_TAG){
+
+
+2)  dal jar di microlog, per fare la build devo togliere la cartella relativa ad xmlPullParser.
+
+
+3) rimuovere la classe md5 se non serve perchè ha licenza GPL
+
+
+Esempi utili: 
+
+http://wordpress.rintcius.nl/post/look-how-this-wordpress-post-got-created-from-java
+
+http://snippets.dzone.com/posts/show/6282
+
+http://www.telewaving.com/

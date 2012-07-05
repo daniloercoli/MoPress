@@ -1,0 +1,331 @@
+<project name="mopress" basedir="." default="wtk.build">
+	
+	<property file="build.properties" />
+
+	
+	<taskdef resource="antenna.properties" classpath="${antenna.lib.jar};${proguard.lib.jar}"/>
+
+	<!-- task di sostituzione stringhe nei file sorgenti -->
+	<target name="copy-app-src" depends="init">
+		<property name="debug" value="" />
+		<copy todir="${build.src.dir}.tmp">
+			<fileset dir="${src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${build.src.dir}.tmp">
+			<fileset dir="thirdparty">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		
+<!--		<replace dir="${build.src.dir}.tmp" summary="true" token="@{app.version}" value="${app.version}" /> -->
+
+		<wtkpreprocess srcdir="${build.src.dir}.tmp" destdir="${build.src.dir}" symbols="BB_VERSION='all'" if="rim-simulator.build" />
+		
+		<wtkpreprocess srcdir="${build.src.dir}.tmp" destdir="${build.src.dir}" unless="rim-simulator.build" />	
+		
+	</target>
+	
+	
+	<target name="moto.build">
+		<property name="sign" value="false" />
+		<property name="moto.build" value="true" />
+		<antcall target="build"></antcall>
+	</target>
+	
+	
+	
+	<target name="rim-simulator.build">
+		<property name="obfuscate_off" value="true" />
+		<property name="sign" value="false" />
+		<property name="rim-simulator.build" value="true" />
+		<antcall target="build">
+			<param name="codname" value="bb_old_mopress" />
+		</antcall>
+	</target>
+	
+	<target name="rim-phones.build">
+		<property name="obfuscate_off" value="true" />
+		<property name="sign" value="false" />
+		<property name="rim.build" value="true" />
+		<antcall target="build">
+			<param name="codname" value="bb_mopress" />
+		</antcall>
+	</target>
+
+	
+	<target name="wtk.build">
+		<property name="sign" value="false" />
+		<antcall target="build"></antcall>
+	</target>
+	
+	
+	<target name="prev_kxmlLib" depends="clean, init">
+		<copy todir="${build.dir}" file="${lib.dir}/kxml2-2.3.0.jar"></copy>
+			<wtkpreverify jarfile="${build.dir}/kxml2-2.3.0.jar" classpath="${basedir}/lib/jsr184.jar;${wtk.home}/lib/jsr082.jar" />
+	
+	</target>
+	
+	<target name="build" depends="clean, init, copy-app-src">
+	
+		<copy todir="${build.dir}" file="${lib.dir}/kxml2-2.3.0.jar"></copy>
+		<wtkpreverify jarfile="${build.dir}/kxml2-2.3.0.jar" classpath="${basedir}/lib/jsr184.jar;${wtk.home}/lib/jsr082.jar" />
+
+		<!-- 
+		<copy todir="${build.dir}" file="${lib.dir}/microlog-logger-1.1.0-SNAPSHOT-me.jar"></copy>
+		<wtkpreverify jarfile="${build.dir}/microlog-logger-1.1.0-SNAPSHOT-me.jar" classpath="${wtk.home}/lib/jsr082.jar;${wtk.home}/lib/wma11.jar;${build.dir}/kxml2-2.3.0.jar" />
+-->
+		
+	
+		<wtkbuild srcdir="${build.src.dir}" tempdir="${classes.dir}.tmp" destdir="${classes.dir}" preverify="true"  source="1.3" target="1.3">
+			<classpath>
+				<pathelement path="${lib.dir}/microlog-logger-1.1.0-SNAPSHOT-me.jar" />
+				<pathelement path="${build.dir}/kxml2-2.3.0.jar" />
+			</classpath>
+		</wtkbuild>
+
+		<wtkjad jadfile="${build.dir}/${package.name}.jad" config="${wtk.cldc.version}" profile="${wtk.midp.version}"
+					name="${app.name}" vendor="${midlet.vendor}" version="${midlet.version}" >
+					<attribute name="MIDlet-Description" value="${app.description}" />
+					<attribute name="MIDlet-Permissions" value="${midlet.permissions}" />
+					<attribute name="MIDlet-Permissions-Opt" value="${midlet.permissions.opt}" />
+					<attribute name="MIDlet-Icon" value="${midlet.icon}"/>
+					
+					<attribute name="MicroEdition-Profile" value="${microedition.profile}" />
+					<attribute name="MicroEdition-Configuration" value="${microedition.configuration}" />
+					<attribute name="MIDlet-Info-URL" value="${app.infourl}" />
+			
+					<midlet class="${midlet1.class}" name="${midlet1.name}" icon="${midlet.icon}" />
+				</wtkjad>
+		
+
+		<wtkpackage jarfile="${build.dir}/${package.name}.jar" jadfile="${build.dir}/${package.name}.jad">
+			<fileset dir="${classes.dir}" />
+			<fileset dir="${resources.dir}">
+				<include name="**/*.*" />
+			</fileset>
+			<fileset file="${src.dir}/log.properties"/>
+			<libclasspath path="${lib.dir}/microlog-logger-1.1.0-SNAPSHOT-me.jar"/>
+			<libclasspath path="${build.dir}/kxml2-2.3.0.jar"/>			
+		</wtkpackage>
+		
+		<antcall target="obfuscate-classes">
+			<param name="jar.in" value="${build.dir}/${package.name}.jar" />
+			<param name="jar.out" value="${build.dir}/${package.name}_opt.jar" />
+			<param name="class.name" value="${midlet.class}" />
+		</antcall>
+	
+		<wtkjad update="true" jarfile="${build.dir}/${package.name}.jar" jadfile="${build.dir}/${package.name}.jad"  >			
+		</wtkjad>
+				
+		<mkdir dir="${dist.dir}" />
+		<copy todir="${dist.dir}">
+			<fileset dir="${build.dir}">
+				<include name="*${package.name}.ja*" />
+			</fileset>
+		</copy>
+		
+		<!-- task opzionali per i vari dispositivi -->
+		<antcall target="create-moto-jad">
+				<param name="package.name" value="${package.name}" />
+				<param name="midlet.name" value="${midlet.name}" />
+				<param name="midlet.class" value="${midlet.class}" />
+		</antcall>
+		
+		<antcall target="create-rim-package">
+			<param name="codname" value="${codname}" />
+		</antcall>
+		
+	</target>
+
+
+	<target name="create-rim-package" depends="rimTarget.check" if="rimTarget.run">
+		<echo>RIM BUILD</echo>
+	
+		<property name="bb.buildjars.home" location="C:/opt/Research In Motion/BlackBerry JDE 4.6.0/bin"/>
+		
+	    <wtkrapc quiet="true"
+	    	midlet="true" 
+	    	jadfile="${build.dir}/${package.name}.jad" 
+	    	source="${build.dir}/${package.name}.jar" 
+	    	codename="${codname}"
+	     	import="C:/opt/Research In Motion/BlackBerry JDE 4.6.0/lib/net_rim_api.jar;" 
+	    	destdir="C:/tmp/">
+	    </wtkrapc>	
+	</target>		
+	
+	<target name="rimTarget.check">
+		<echo>CHECKING TO START RIM BUILD</echo>
+	    <condition property="rimTarget.run">
+	        <or>
+	            <isset property="rim.build"/>
+	        	<isset property="rim-simulator.build"/>
+	        </or>
+	    </condition>
+	</target>
+
+	
+	<target name="create-moto-jad" if="moto.build">
+		<echo>MOTOROLA BUILD</echo>
+		<copy file="${dist.dir}/${package.name}.jad" tofile="${dist.dir}/moto-${package.name}.jad" />
+		<wtkjad jadfile="${dist.dir}/moto-${package.name}.jad" jarfile="${dist.dir}/${package.name}.jar" name="${midlet.name}" vendor="${midlet.vendor}" version="${midlet.version}">
+			<midlet class="${midlet.class}" name="${midlet.name}" icon="${midlet.icon}" />
+			<attribute name="MIDlet-Web-Session" value="EMT WAP" />
+		</wtkjad>
+	</target>
+
+	
+	
+	<target name="obfuscate-classes" unless="obfuscate_off">
+		<taskdef resource="proguard/ant/task.properties" classpath="${proguard.lib.jar}" />
+		<!-- proguard obfuscate="false" optimize="true" optimizationpasses="4" microedition="true" verbose="true" ignorewarnings="true" -->
+		<!-- proguard verbose="true" usemixedcaseclassnames="false" microedition="true" repackageclasses="true" 
+			overloadaggressively="on" defaultpackage="" allowaccessmodification="on" printseeds="on" 
+			ignorewarnings="true" optimizationpasses="4" obfuscate="true" -->	
+
+		<proguard usemixedcaseclassnames="false"  note="false" defaultpackage="" overloadaggressively="true"
+			repackageclasses="" allowaccessmodification="true" microedition="true" >	
+
+			<injar file="${jar.in}" />
+			<outjar file="${jar.out}" />
+			<libraryjar file="${wtk.home}/lib/midpapi20.jar" />
+			<libraryjar file="${wtk.home}/lib/cldcapi11.jar" />
+			<libraryjar file="${wtk.home}/lib/jsr082.jar" />
+			<libraryjar file="${wtk.home}/lib/wma20.jar" />
+			<libraryjar file="${wtk.home}/lib/jsr75.jar" />
+			
+			-keep public class * extends javax.microedition.midlet.MIDlet
+			
+			<!-- -keep class net.sf.** -->
+		</proguard>
+
+		<move file="${build.dir}/${package.name}_opt.jar" tofile="${build.dir}/${package.name}.jar" />
+	</target>
+
+	
+	<target name="obfuscate-classes2" unless="obfuscate_off">
+		<taskdef resource="proguard/ant/task.properties" classpath="${proguard.lib.jar}" />
+		<proguard>	
+			
+        -injars ${jar.in}
+        -outjar ${jar.out}
+        -libraryjars ${wtk.home}/lib/midpapi20.jar;${wtk.home}/lib/cldcapi11.jar
+        -overloadaggressively
+        -defaultpackage ''
+		-ignorewarning
+        -allowaccessmodification
+        -dontusemixedcaseclassnames            
+        -keep public class * extends javax.microedition.midlet.MIDlet
+		-microedition
+
+			<!-- -keep class net.sf.** -->
+		</proguard>
+
+		<move file="${build.dir}/${package.name}_opt.jar" tofile="${build.dir}/${package.name}.jar" />
+	</target>
+
+	<target name="moto">
+		<property name="moto.build" value="true" />
+	</target>
+
+
+	<target name="sign" unless="hudson">
+		<antcall target="sign-package">
+			<param name="jad.name" value="stored-maps-signed-${midlet.version.string}.jad" />
+			<param name="jar.name" value="stored-maps-signed-${midlet.version.string}.jar" />
+		</antcall>
+		<antcall target="sign-package">
+			<param name="jad.name" value="stored-maps-signed-s60-${midlet.version.string}.jad" />
+			<param name="jar.name" value="stored-maps-signed-s60-${midlet.version.string}.jar" />
+		</antcall>
+	</target>
+
+	<target name="sign-package">
+		<taskdef name="sign" classname="de.pleumann.antenna.WtkSign" classpath="${antenna.lib.jar}" />
+		<sign certalias="${cert.alias}" certpass="${cert.pass}" jadfile="dist/${jad.name}" jarfile="dist/${jar.name}" keystore="${keystore.file}" storepass="${keystore.pass}" />
+	</target>
+
+
+		
+		<target name="buildBBversion" description="Builds *.jar and *.cod files using rapc tool">
+
+
+			<property name="bb_JDE" value="${bb_JDE_46}" />
+			<!-- default value if not specified otherwise before -->
+
+			<copy todir="${build.src.dir}">
+				<fileset dir="${src.dir}">
+					<include name="**/**/**/**/*.java" />
+					<include name="**/**/**/*.java" />
+					<include name="**/**/*.java" />
+					<exclude name="com/nutiteq/utils/fs/MotoFileSystem.java" />
+					<exclude name="com/nutiteq/utils/fs/IDENFileSystem.java" />
+					<exclude name="com/nutiteq/utils/fs/SiemensFileSystem.java" />
+					<exclude name="com/nutiteq/wrappers/**/*.java" />
+					<exclude name="com/nutiteq/wrappers/**/**/*.java" />
+					<exclude name="com/nutiteq/utils/fs/*.java" if="oldBB" />
+					<exclude name="com/nutiteq/bluetooth/*.java" if="oldBB" />
+					<exclude name="com/nutiteq/location/providers/*.java" if="oldBB" />
+					<exclude name="com/nutiteq/location/cellid/*.java" if="oldBB" />
+					<exclude name="com/nutiteq/maps/StoredMap.java" if="oldBB" />
+
+				</fileset>
+			</copy>
+		<!--	<copy todir="${build.src.dir}">
+				<fileset dir="thirdparty/src">
+					<include name="**/**/**/*.java" />
+					<include name="**/**/**/**/*.java" />
+					<include name="**/**/*.java" />
+				</fileset>
+			</copy -->
+
+			<copy todir="${build.src.dir}">
+				<fileset dir="${resources.dir}">
+					<include name="**/*.*" />
+				</fileset>
+			</copy>
+
+			<rim jdehome="${blackberry.home}/${bb_JDE}" javahome="${java_home}">
+				<workspace src="${build.src.dir}/${app.name}_.jdw" build="true" update="true">
+					<library  src="${build.src.dir}/${app.name}.jdp" description="${app.name}" options="-quiet " update="true" vendor="${vendor.name}" version="${app.version}">
+
+
+						<files dir="${build.src.dir}">
+							<include name="**/**/**/**/*.java" />
+							<include name="**/**/**/*.java" />
+							<include name="**/**/*.java" />
+							<include name="**/*.png" />
+						</files>
+
+
+
+					</library>
+
+				</workspace>
+			</rim>
+
+			<copy todir="${dist.dir}/${bb_JDE}-${app.version}">
+				<fileset dir="${build.src.dir}">
+					<include name="*.cod" />
+					<include name="*.jar" />
+				</fileset>
+			</copy>
+		</target>
+	
+	
+	<target name="clean">
+			<delete dir="${build.dir}" />
+			<delete dir="${dist.dir}" />
+		</target>
+
+		<target name="init">
+			<mkdir dir="${classes.dir}" />
+			<mkdir dir="${dist.dir}" />
+			<mkdir dir="${rim.dist.dir}" />
+			<mkdir dir="${rim.dist.dir}" />
+			<mkdir dir="${build.src.dir}" />
+			<mkdir dir="${build.src.dir}.tmp" />
+		</target>
+	
+</project>

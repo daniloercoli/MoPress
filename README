@@ -1,0 +1,56 @@
+MoPress is a blogging client application developed for mobile phones. It allows a mobile phone to post a content (text, image, audio, video) to a Blog, using any type of available network (mobile phone network or Wi-Fi network).
+
+http://www.danais.it/web/eng/demo/mopress.html
+
+Building Mopress
+-----------------
+
+ a) Sun WTK must be installed, set WTK_HOME, e.g. WTK_HOME=C:\WTK2.5.1
+    Download Link: http://java.sun.com/products/sjwtoolkit/
+
+ b) J2Me Polish must be installed: 
+    Download link: http://www.j2mepolish.org
+ 
+ 
+ c) Eclipse with Ant support is raccomanded
+
+
+ d) Running ant task "j2mepolish" for a complete build.
+
+
+License information.
+--------------------
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+See the file "LICENSE.txt" for the full text of the GNU General Public License.
+
+
+MoPress uses a modified version of kXML-RPC <http://sourceforge.net/projects/kxmlrpc/>,
+which in turn uses the kXML parser <http://sourceforge.net/projects/kxml/>. These two
+products are licensed under licensed under the GNU Library or Lesser General Public License (LGPL).
+See the respective web pages for a copy of the license. The modified source code for
+kXML-RPC is included with this source distribution, in the "thirdparty" source directory.
+
+MoPress uses J2ME Polish suite. J2ME Polish is distributed under the GNU General Public License.
+http://www.j2mepolish.org.
+
+
+Contact
+-------
+The Mopress team consists of:
+Danilo Ercoli - ercoli@gmail.com  - project admin, developer & initiator
+
+Special Thanks to Danais srl, www.danais.it, that has actively contributed to the development by givin testing devices, food, and money.
